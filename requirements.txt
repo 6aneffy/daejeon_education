@@ -1,0 +1,14 @@
+# PDF 기반 멀티유저 멀티세션 RAG 챗봇 (multi-users-ref.py) 의존성
+# Streamlit Cloud 배포용
+# Secrets: SUPABASE_URL, SUPABASE_ANON_KEY
+
+streamlit>=1.32.0
+supabase>=2.0.0
+langchain>=0.3
+langchain-core>=0.3
+langchain-openai>=0.2
+langchain-text-splitters>=0.3
+langchain-community>=0.3
+openai>=1.0.0
+pypdf>=4.0.0
+python-dotenv>=1.0.0
