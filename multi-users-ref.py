@@ -57,22 +57,37 @@ LOGGER = logging.getLogger("multi_users_rag_chatbot")
 
 
 def setup_logging() -> None:
-    LOG_DIR.mkdir(parents=True, exist_ok=True)
-    log_file = LOG_DIR / f"multi_users_chatbot_{datetime.now().strftime('%Y%m%d')}.log"
+    log_dir = LOG_DIR
+    try:
+        log_dir.mkdir(parents=True, exist_ok=True)
+    except PermissionError:
+        # Streamlit Cloud 등 쓰기 권한이 없는 환경: /tmp 사용
+        log_dir = Path("/tmp") / "multi_users_rag_logs"
+        try:
+            log_dir.mkdir(parents=True, exist_ok=True)
+        except OSError:
+            log_dir = None
 
     if not LOGGER.handlers:
         formatter = logging.Formatter("%(asctime)s | %(levelname)s | %(name)s | %(message)s")
-        file_handler = logging.FileHandler(log_file, encoding="utf-8")
-        file_handler.setLevel(logging.WARNING)
-        file_handler.setFormatter(formatter)
 
         console_handler = logging.StreamHandler()
         console_handler.setLevel(logging.WARNING)
         console_handler.setFormatter(formatter)
 
         LOGGER.setLevel(logging.WARNING)
-        LOGGER.addHandler(file_handler)
         LOGGER.addHandler(console_handler)
+
+        if log_dir is not None:
+            try:
+                log_file = log_dir / f"multi_users_chatbot_{datetime.now().strftime('%Y%m%d')}.log"
+                file_handler = logging.FileHandler(log_file, encoding="utf-8")
+                file_handler.setLevel(logging.WARNING)
+                file_handler.setFormatter(formatter)
+                LOGGER.addHandler(file_handler)
+            except OSError:
+                pass
+
         LOGGER.propagate = False
 
     for noisy_logger in ("httpx", "httpcore", "urllib3", "openai", "langchain", "supabase"):
